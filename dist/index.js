@@ -1,15 +1,11 @@
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import http from "http";
+import "dotenv/config";
 const { DISCORD_TOKEN = "", CLIENT_ID = "", GUILD_ID = "", PORT = "8080", } = process.env;
 if (!DISCORD_TOKEN || !CLIENT_ID) {
     throw new Error("Missing DISCORD_TOKEN or CLIENT_ID");
 }
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-// Minimal commands (same shape used by register script)
-export const commands = [
-    { name: "ping", description: "Replies with pong." },
-    { name: "about", description: "What this bot does." },
-];
 client.once(Events.ClientReady, (c) => {
     console.log(`Ready as ${c.user.tag}`);
 });
@@ -21,11 +17,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
             await interaction.reply("pong");
             break;
         case "about":
-            await interaction.reply("I'm a minimal TS bot running on Cloud Run. Try /ping.");
+            await interaction.reply("I'm a minimal TS bot running on Fly.io. Try /ping.");
             break;
     }
 });
-// Tiny HTTP health server so Cloud Run keeps the instance alive
+// Tiny HTTP health server so Fly keeps the machine warm
 http
     .createServer((_, res) => {
     res.writeHead(200, { "Content-Type": "text/plain" });

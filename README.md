@@ -1,14 +1,14 @@
 # Discord Bot - Event Horizon Bot
 
-A minimal TypeScript Discord bot designed for deployment to Google Cloud Run. Features instant slash commands, health monitoring, and automated deployment via GitHub Actions.
+A minimal TypeScript Discord bot designed for deployment to Fly.io. Features instant slash commands, health monitoring, and automated deployment via GitHub Actions.
 
 ## Features
 
 - **Slash Commands**: `/ping` → "pong", `/about` → bot information
-- **Health Endpoint**: HTTP server on `/` for Cloud Run health checks
+- **Health Endpoint**: HTTP server on `/` for Fly health checks
 - **Environment-Based Commands**: Guild commands for dev (instant), global commands for prod
 - **Zero Frameworks**: Built with only discord.js + native HTTP server
-- **Auto-Deploy**: GitHub Actions workflow for seamless Cloud Run deployment
+- **Auto-Deploy**: GitHub Actions workflow for seamless Fly.io deployment
 
 ## Project Structure
 
@@ -19,6 +19,7 @@ discord-bot/
 │   └── registerCommands.ts   # Registers slash commands
 ├── .github/workflows/
 │   └── deploy.yaml           # GitHub Actions deployment workflow
+├── fly.toml                  # Fly.io app configuration
 ├── package.json
 ├── tsconfig.json
 ├── .env.example
@@ -33,23 +34,26 @@ discord-bot/
 DISCORD_TOKEN=...   # Your Discord bot token
 CLIENT_ID=...       # Discord Application (not bot) ID
 GUILD_ID=...        # Dev guild for instant command registration
-PORT=8080          # Cloud Run provides this (fallback to 8080)
+PORT=8080          # Fly provides this in production (fallback to 8080)
 ```
 
 ## Local Development
 
 1. **Setup Environment**:
+
    ```bash
    cp .env.example .env
    # Edit .env with your Discord bot credentials
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Register Commands** (one-time setup):
+
    ```bash
    npm run register
    ```
@@ -63,90 +67,52 @@ The bot will run with hot reload on port 8080 with a health endpoint at `http://
 
 ## Production Deployment
 
-### Prerequisites (One-time Setup)
+### Prerequisites (one-time setup)
 
-1. **Google Cloud Project**:
-   - Create a GCP project
-   - Enable: Cloud Run, Artifact Registry, Secret Manager APIs
+1. **Install Fly tooling**
+   - `curl -L https://fly.io/install.sh | sh`
+   - `fly auth signup` (or `fly auth login` if you already have an account)
 
-2. **Service Account**:
-   - Create service account with roles:
-     - `roles/run.admin`
-     - `roles/artifactregistry.admin` (or writer)
-     - `roles/iam.serviceAccountUser`
+2. **Create the Fly app**
+   - From the project root run `fly launch --no-deploy --copy-config --name <your-fly-app-name>`
+   - Update the `app` value in `fly.toml` so it matches `<your-fly-app-name>`
 
-3. **Artifact Registry**:
+3. **Configure secrets on Fly**
    ```bash
-   gcloud artifacts repositories create discord \
-     --repository-format=docker \
-     --location=us-central1
+   fly secrets set DISCORD_TOKEN=... CLIENT_ID=... GUILD_ID=...
    ```
 
-### GitHub Secrets
+### GitHub secrets
 
-Configure the following secrets in your GitHub repository:
+Add these to your repository settings:
 
-- `GCP_PROJECT_ID`: Your Google Cloud project ID
-- `GCP_WIF_PROVIDER`: Workload Identity Federation provider resource name
-- `GCP_SERVICE_ACCOUNT`: Service account email (e.g., `gh-deployer@PROJECT_ID.iam.gserviceaccount.com`)
-- `DISCORD_TOKEN`: Your Discord bot token
-- `CLIENT_ID`: Your Discord application client ID
-- `GUILD_ID`: Your development Discord guild/server ID
+- `FLY_API_TOKEN`: output of `fly auth token`
+- `FLY_APP_NAME`: the Fly app name you created above
+- `DISCORD_TOKEN`: your Discord bot token
+- `CLIENT_ID`: your Discord application client ID
+- `GUILD_ID`: your development Discord guild/server ID
 
-### Manual Deployment
+### Manual deployment
 
-1. **Build and Push Image**:
-   ```bash
-   gcloud builds submit --tag us-central1-docker.pkg.dev/$PROJECT_ID/discord/discord-bot:$(git rev-parse --short HEAD)
-   ```
+```bash
+fly deploy --remote-only --config fly.toml --app <your-fly-app-name>
+```
 
-2. **Deploy to Cloud Run**:
-   ```bash
-   gcloud run deploy discord-bot \
-     --image us-central1-docker.pkg.dev/$PROJECT_ID/discord/discord-bot:$(git rev-parse --short HEAD) \
-     --region us-central1 \
-     --platform managed \
-     --allow-unauthenticated \
-     --min-instances=1 \
-     --cpu=1 --memory=512Mi \
-     --cpu-boost \
-     --execution-environment gen2
-   ```
+### Automated deployment
 
-3. **Set Environment Variables**:
-   ```bash
-   gcloud run services update discord-bot \
-     --region us-central1 \
-     --set-env-vars DISCORD_TOKEN=...,CLIENT_ID=...,GUILD_ID=...
-   ```
+Push to the `master` branch to trigger the GitHub Actions workflow. It will:
 
-4. **Register Commands** (after deployment):
-   ```bash
-   gcloud run jobs create register-commands \
-     --image us-central1-docker.pkg.dev/$PROJECT_ID/discord/discord-bot:$(git rev-parse --short HEAD) \
-     --region us-central1 \
-     --set-env-vars DISCORD_TOKEN=...,CLIENT_ID=...,GUILD_ID=... \
-     --command "node" --args "dist/registerCommands.js"
+1. Install `flyctl`
+2. Build and deploy the Docker image using the remote Fly builder
 
-   gcloud run jobs run register-commands --region us-central1
-   ```
+## Fly configuration notes
 
-### Automated Deployment
-
-Push to the `main` branch to trigger automatic deployment via GitHub Actions. The workflow will:
-
-1. Build the Docker image
-2. Push to Artifact Registry
-3. Deploy to Cloud Run
-4. Update environment variables
-
-## Important Configuration Notes
-
-- **CPU Always Allocated**: In the Cloud Run console, ensure "CPU is always allocated" is enabled to keep the Discord WebSocket connection alive
-- **Minimum Instances**: Keep `min-instances=1` to maintain persistent connection
-- **Command Types**: 
+- **Always-on instance**: `auto_stop_machines=false` and `min_machines_running=1` in `fly.toml` keep a machine warm for the Discord WebSocket.
+- **Health checks**: Fly hits `/` for health; keep the HTTP server responding with 200 OK.
+- **Scaling**: Adjust CPU/RAM or machine count with `fly scale` if your usage changes.
+- **Command types**:
   - Guild commands (dev): Instant registration, use during development
-  - Global commands (prod): Up to 1 hour propagation, uncomment in registerCommands.ts for production
+  - Global commands (prod): Up to 1 hour propagation, uncomment in `registerCommands.ts` for production
 
 ## Commands
 
@@ -163,4 +129,4 @@ Push to the `main` branch to trigger automatic deployment via GitHub Actions. Th
 
 ## Architecture
 
-The bot maintains a persistent WebSocket connection to Discord while running a minimal HTTP server for Cloud Run health checks. The dual-server approach ensures both Discord connectivity and Cloud Run instance persistence.
+The bot maintains a persistent WebSocket connection to Discord while running a minimal HTTP server for Fly's health checks. The dual-server approach keeps the Discord session alive while satisfying Fly's load balancer probes.

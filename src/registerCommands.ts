@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { REST, Routes } from "discord.js";
-import { commands } from "./index";
+import { commands } from "./commands.js";
 
 const { DISCORD_TOKEN = "", CLIENT_ID = "", GUILD_ID = "" } = process.env;
 if (!DISCORD_TOKEN || !CLIENT_ID) throw new Error("Missing env");

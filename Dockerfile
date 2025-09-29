@@ -17,6 +17,6 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
-# Cloud Run provides $PORT; our app listens on it.
+# Fly provides $PORT in production; our app listens on it.
 ENV PORT=8080
 CMD ["node", "dist/index.js"]
