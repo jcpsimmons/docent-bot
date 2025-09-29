@@ -1,5 +1,3 @@
-// Minimal commands (same shape used by register script)
-export const commands = [
-  { name: "ping", description: "Replies with pong." },
-  { name: "about", description: "What this bot does." },
-] as const;
+// Legacy commands file - replaced by src/commands/index.ts
+// This file is kept for backwards compatibility but should be removed eventually
+export { commandData as commands } from "./commands/index.js";

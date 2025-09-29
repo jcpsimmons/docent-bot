@@ -1,4 +1,4 @@
-# Discord Bot - Event Horizon Bot
+# Discord Bot - Docent Bot
 
 A minimal TypeScript Discord bot designed for deployment to Fly.io. Features instant slash commands, health monitoring, and automated deployment via GitHub Actions.
 
@@ -119,9 +119,32 @@ Push to the `master` branch to trigger the GitHub Actions workflow. It will:
 - `/ping` - Simple health check, responds with "pong"
 - `/about` - Information about the bot
 
+### Adding New Commands
+
+This bot uses a modular command system that allows multiple developers to work on different commands simultaneously without conflicts. See [SLASH_COMMANDS.md](./SLASH_COMMANDS.md) for the complete development guide.
+
+**Quick Start:**
+1. Copy `src/commands/_template.ts` to `src/commands/your-command.ts`
+2. Implement your command following the `ISlashCommand` interface
+3. Add your command to `src/commands/index.ts`
+4. Run `npm run register` to deploy to Discord
+
+**File Structure:**
+```
+src/
+├── commands/
+│   ├── _template.ts      # Template for new commands
+│   ├── index.ts          # Central registry (only potential conflict point)
+│   ├── ping.ts           # Example command
+│   └── your-command.ts   # Your new commands
+└── types/
+    └── ISlashCommand.ts  # Command interface
+```
+
 ## Scripts
 
 - `npm run dev` - Start development server with hot reload
+- `npm run validate` - Validate all slash commands for common issues
 - `npm run register` - Register slash commands to development guild
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run start` - Start production server

@@ -15,7 +15,7 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-import { commands } from "./commands.js";
+import { getCommand } from "./commands/index.js";
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready as ${c.user.tag}`);
@@ -24,15 +24,22 @@ client.once(Events.ClientReady, (c) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  switch (interaction.commandName) {
-    case "ping":
-      await interaction.reply("pong");
-      break;
-    case "about":
-      await interaction.reply(
-        "I'm a minimal TS bot running on Fly.io. Try /ping."
-      );
-      break;
+  const command = getCommand(interaction.commandName);
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error('Error executing command:', error);
+    
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    } else {
+      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
   }
 });
 
