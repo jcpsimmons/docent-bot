@@ -102,8 +102,12 @@ fly deploy --remote-only --config fly.toml --app <your-fly-app-name>
 
 Push to the `master` branch to trigger the GitHub Actions workflow. It will:
 
-1. Install `flyctl`
-2. Build and deploy the Docker image using the remote Fly builder
+1. Run unit tests and validation checks
+2. Build the TypeScript code
+3. Install `flyctl`
+4. Build and deploy the Docker image using the remote Fly builder
+
+The deployment will only proceed if all tests pass.
 
 ## Fly configuration notes
 
@@ -149,6 +153,45 @@ src/
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run start` - Start production server
 - `npm run register:dist` - Register commands using compiled JavaScript
+- `npm test` - Run unit tests
+- `npm run test:watch` - Run unit tests in watch mode
+- `npm run test:coverage` - Run unit tests with coverage report
+
+## Testing
+
+The project includes comprehensive unit tests for all slash commands using Jest:
+
+- **Framework**: Jest with TypeScript ESM support
+- **Coverage**: >90% code coverage across all commands
+- **Mocking**: Custom Discord.js interaction mocks for isolated testing
+- **CI/CD**: Automated testing on pull requests and master branch pushes
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode during development
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Structure
+
+```
+src/
+├── __tests__/
+│   ├── commands/         # Command-specific tests
+│   │   ├── ping.test.ts
+│   │   ├── about.test.ts
+│   │   ├── roll.test.ts
+│   │   └── index.test.ts
+│   └── utils/
+│       └── mockInteraction.ts  # Discord.js mocking utilities
+```
 
 ## Architecture
 
