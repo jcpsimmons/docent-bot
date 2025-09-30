@@ -122,6 +122,8 @@ The deployment will only proceed if all tests pass.
 
 - `/ping` - Simple health check, responds with "pong"
 - `/about` - Information about the bot
+- `/roll` - Roll dice with customizable sides and count
+- `/coffee` - Start a coffee chat with a random server member
 
 ### Adding New Commands
 

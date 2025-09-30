@@ -13,7 +13,7 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
   throw new Error("Missing DISCORD_TOKEN or CLIENT_ID");
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 import { getCommand } from "./commands/index.js";
 
