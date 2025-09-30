@@ -5,6 +5,7 @@ A minimal TypeScript Discord bot designed for deployment to Fly.io. Features ins
 ## Features
 
 - **Slash Commands**: `/ping` → "pong", `/about` → bot information, `/technews` → top Hacker News headlines
+- **Slash Commands**: `/ping` → "pong", `/about` → bot information, `/technews` → top Hacker News headlines
 - **Health Endpoint**: HTTP server on `/` for Fly health checks
 - **Environment-Based Commands**: Guild commands for dev (instant), global commands for prod
 - **Zero Frameworks**: Built with only discord.js + native HTTP server
@@ -124,6 +125,7 @@ The deployment will only proceed if all tests pass.
 
 - `/ping` - Simple health check, responds with "pong"
 - `/about` - Information about the bot
+- `/technews` - Get the top 3 headlines from Hacker News
 - `/roll` - Roll dice with customizable sides and count
 - `/coffee` - Start a coffee chat with a random server member
 - `/technews` - Get the top 3 headlines from Hacker News
