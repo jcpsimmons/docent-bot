@@ -4,7 +4,7 @@ A minimal TypeScript Discord bot designed for deployment to Fly.io. Features ins
 
 ## Features
 
-- **Slash Commands**: `/ping` → "pong", `/about` → bot information
+- **Slash Commands**: `/ping` → "pong", `/about` → bot information, `/technews` → top Hacker News headlines
 - **Health Endpoint**: HTTP server on `/` for Fly health checks
 - **Environment-Based Commands**: Guild commands for dev (instant), global commands for prod
 - **Zero Frameworks**: Built with only discord.js + native HTTP server
@@ -70,10 +70,12 @@ The bot will run with hot reload on port 8080 with a health endpoint at `http://
 ### Prerequisites (one-time setup)
 
 1. **Install Fly tooling**
+
    - `curl -L https://fly.io/install.sh | sh`
    - `fly auth signup` (or `fly auth login` if you already have an account)
 
 2. **Create the Fly app**
+
    - From the project root run `fly launch --no-deploy --copy-config --name <your-fly-app-name>`
    - Update the `app` value in `fly.toml` so it matches `<your-fly-app-name>`
 
@@ -124,18 +126,21 @@ The deployment will only proceed if all tests pass.
 - `/about` - Information about the bot
 - `/roll` - Roll dice with customizable sides and count
 - `/coffee` - Start a coffee chat with a random server member
+- `/technews` - Get the top 3 headlines from Hacker News
 
 ### Adding New Commands
 
 This bot uses a modular command system that allows multiple developers to work on different commands simultaneously without conflicts. See [SLASH_COMMANDS.md](./SLASH_COMMANDS.md) for the complete development guide.
 
 **Quick Start:**
+
 1. Copy `src/commands/_template.ts` to `src/commands/your-command.ts`
 2. Implement your command following the `ISlashCommand` interface
 3. Add your command to `src/commands/index.ts`
 4. Run `npm run register` to deploy to Discord
 
 **File Structure:**
+
 ```
 src/
 ├── commands/
