@@ -16,9 +16,17 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 import { getCommand } from "./commands/index.js";
+import { scheduler } from "./services/scheduler.js";
+import { jobs } from "./jobs/index.js";
 
 client.once(Events.ClientReady, (c) => {
   console.log(`Ready as ${c.user.tag}`);
+  
+  // Initialize scheduled jobs
+  console.log(`Registering ${jobs.length} scheduled jobs...`);
+  for (const job of jobs) {
+    scheduler.register(job);
+  }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

@@ -5,6 +5,7 @@ A minimal TypeScript Discord bot designed for deployment to Fly.io. Features ins
 ## Features
 
 - **Slash Commands**: `/ping` → "pong", `/about` → bot information
+- **Scheduler/Cron**: Schedule any function to run at specified intervals using cron syntax
 - **Health Endpoint**: HTTP server on `/` for Fly health checks
 - **Environment-Based Commands**: Guild commands for dev (instant), global commands for prod
 - **Zero Frameworks**: Built with only discord.js + native HTTP server
@@ -16,7 +17,11 @@ A minimal TypeScript Discord bot designed for deployment to Fly.io. Features ins
 discord-bot/
 ├── src/
 │   ├── index.ts              # Bot runtime + health HTTP server
-│   └── registerCommands.ts   # Registers slash commands
+│   ├── registerCommands.ts   # Registers slash commands
+│   ├── commands/             # Slash command definitions
+│   ├── jobs/                 # Scheduled job definitions
+│   ├── services/             # Scheduler and other services
+│   └── types/                # TypeScript interfaces
 ├── .github/workflows/
 │   └── deploy.yaml           # GitHub Actions deployment workflow
 ├── fly.toml                  # Fly.io app configuration
@@ -25,7 +30,9 @@ discord-bot/
 ├── .env.example
 ├── Dockerfile
 ├── .dockerignore
-└── README.md
+├── README.md
+├── SLASH_COMMANDS.md         # Slash commands development guide
+└── SCHEDULER.md              # Scheduler documentation
 ```
 
 ## Environment Variables
@@ -145,6 +152,35 @@ src/
 │   └── your-command.ts   # Your new commands
 └── types/
     └── ISlashCommand.ts  # Command interface
+```
+
+## Scheduled Jobs
+
+The bot includes a scheduler that can run any function at specified intervals using cron syntax. See [SCHEDULER.md](./SCHEDULER.md) for complete documentation.
+
+**Quick Start:**
+1. Copy `src/jobs/_example.ts` to `src/jobs/your-job.ts`
+2. Implement your job following the `IScheduledJob` interface
+3. Add your job to the `jobs` array in `src/jobs/index.ts`
+4. Restart the bot - jobs are registered automatically on startup
+
+**Common Examples:**
+- `"* * * * *"` - Every minute
+- `"0 * * * *"` - Every hour
+- `"0 9 * * *"` - Every day at 9am
+- `"0 9 * * 1-5"` - Every weekday at 9am
+
+**File Structure:**
+```
+src/
+├── jobs/
+│   ├── _example.ts       # Example scheduled job
+│   ├── index.ts          # Central registry
+│   └── your-job.ts       # Your new jobs
+├── services/
+│   └── scheduler.ts      # Scheduler service
+└── types/
+    └── IScheduledJob.ts  # Job interface
 ```
 
 ## Scripts
