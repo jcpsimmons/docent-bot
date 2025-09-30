@@ -4,6 +4,7 @@ import { ISlashCommand } from "../types/ISlashCommand.js";
 import { aboutCommand } from "./about.js";
 import { pingCommand } from "./ping.js";
 import { rollCommand } from "./roll.js";
+import { technewsCommand } from "./technews.js";
 
 /**
  * Central registry of all slash commands
@@ -18,6 +19,7 @@ export const commands: ISlashCommand[] = [
   aboutCommand,
   pingCommand,
   rollCommand,
+  technewsCommand,
   // Add new commands here in alphabetical order to minimize merge conflicts
 ];
 
