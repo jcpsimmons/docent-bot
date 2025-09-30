@@ -2,6 +2,7 @@ import { ISlashCommand } from "../types/ISlashCommand.js";
 
 // Import individual commands
 import { aboutCommand } from "./about.js";
+import { coffeeCommand } from "./coffee.js";
 import { pingCommand } from "./ping.js";
 import { rollCommand } from "./roll.js";
 
@@ -16,6 +17,7 @@ import { rollCommand } from "./roll.js";
  */
 export const commands: ISlashCommand[] = [
   aboutCommand,
+  coffeeCommand,
   pingCommand,
   rollCommand,
   // Add new commands here in alphabetical order to minimize merge conflicts
