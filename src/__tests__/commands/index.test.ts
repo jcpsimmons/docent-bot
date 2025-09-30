@@ -3,15 +3,17 @@ import { coffeeCommand } from "../../commands/coffee.js";
 import { commandData, commands, getCommand } from "../../commands/index.js";
 import { pingCommand } from "../../commands/ping.js";
 import { rollCommand } from "../../commands/roll.js";
+import { technewsCommand } from "../../commands/technews.js";
 
 describe("commands index", () => {
   describe("commands array", () => {
     it("should export all available commands", () => {
-      expect(commands).toHaveLength(4);
+      expect(commands).toHaveLength(5);
       expect(commands).toContain(aboutCommand);
       expect(commands).toContain(pingCommand);
       expect(commands).toContain(rollCommand);
       expect(commands).toContain(coffeeCommand);
+      expect(commands).toContain(technewsCommand);
     });
 
     it("should have unique command names", () => {
@@ -56,6 +58,7 @@ describe("commands index", () => {
       expect(getCommand("about")).toBe(aboutCommand);
       expect(getCommand("roll")).toBe(rollCommand);
       expect(getCommand("coffee")).toBe(coffeeCommand);
+      expect(getCommand("technews")).toBe(technewsCommand);
     });
 
     it("should return undefined for invalid command name", () => {
