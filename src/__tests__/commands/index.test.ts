@@ -58,6 +58,7 @@ describe("commands index", () => {
       expect(getCommand("about")).toBe(aboutCommand);
       expect(getCommand("roll")).toBe(rollCommand);
       expect(getCommand("coffee")).toBe(coffeeCommand);
+      expect(getCommand("technews")).toBe(technewsCommand);
     });
 
     it("should return undefined for invalid command name", () => {
