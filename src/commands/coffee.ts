@@ -13,6 +13,9 @@ export const coffeeCommand: ISlashCommand = {
       return;
     }
 
+    // Defer reply to prevent timeout during member fetching
+    await interaction.deferReply({ ephemeral: true });
+
     try {
       // Fetch all guild members
       await interaction.guild.members.fetch();
@@ -24,21 +27,21 @@ export const coffeeCommand: ISlashCommand = {
 
       // Check if there are any eligible members
       if (eligibleMembers.size === 0) {
-        await interaction.reply({ content: "There are no other members available for a coffee chat!", ephemeral: true });
+        await interaction.editReply({ content: "There are no other members available for a coffee chat!" });
         return;
       }
 
       // Randomly select a member
       const randomMember = eligibleMembers.random();
       if (!randomMember) {
-        await interaction.reply({ content: "Could not find a member for coffee chat. Please try again!", ephemeral: true });
+        await interaction.editReply({ content: "Could not find a member for coffee chat. Please try again!" });
         return;
       }
 
       // Create a group DM with the requester, selected member, and bot
       try {
-        // First, acknowledge the interaction
-        await interaction.reply({ content: `☕ Setting up a coffee chat with ${randomMember.displayName}...`, ephemeral: true });
+        // First, update the deferred reply
+        await interaction.editReply({ content: `☕ Setting up a coffee chat with ${randomMember.displayName}...` });
 
         // Try to create DMs with both users
         const requesterDM = await interaction.user.createDM();
@@ -51,24 +54,29 @@ export const coffeeCommand: ISlashCommand = {
         await selectedMemberDM.send(coffeeMessage);
 
         // Send a follow-up to confirm success
-        await interaction.followUp({ content: `✅ Coffee chat started! Check your DMs - you've been paired with ${randomMember.displayName}!`, ephemeral: true });
+        await interaction.editReply({ content: `✅ Coffee chat started! Check your DMs - you've been paired with ${randomMember.displayName}!` });
 
       } catch (dmError) {
         console.error('Error creating DMs:', dmError);
-        // If DMs fail, fall back to a public message
-        await interaction.followUp({ 
-          content: `☕ **Coffee Chat Time!** ☕\n\n${interaction.user} and ${randomMember}, you've been randomly paired for a coffee chat! Why not grab a coffee and have a friendly conversation? 🎉`, 
-          ephemeral: false 
+        // If DMs fail, fall back to a public message by editing the reply
+        await interaction.editReply({ 
+          content: `☕ **Coffee Chat Time!** ☕\n\n${interaction.user} and ${randomMember}, you've been randomly paired for a coffee chat! Why not grab a coffee and have a friendly conversation? 🎉`
         });
       }
 
     } catch (error) {
       console.error('Error in coffee command:', error);
       
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: 'There was an error setting up the coffee chat. Please try again!', ephemeral: true });
-      } else {
-        await interaction.reply({ content: 'There was an error setting up the coffee chat. Please try again!', ephemeral: true });
+      try {
+        await interaction.editReply({ content: 'There was an error setting up the coffee chat. Please try again!' });
+      } catch (editError) {
+        console.error('Error editing reply:', editError);
+        // If we can't edit the deferred reply, try a follow-up
+        try {
+          await interaction.followUp({ content: 'There was an error setting up the coffee chat. Please try again!', ephemeral: true });
+        } catch (followUpError) {
+          console.error('Error with follow-up:', followUpError);
+        }
       }
     }
   },
