@@ -206,4 +206,6 @@ export const adminCommand: ISlashCommand = {
 Look at these existing commands for reference:
 - `src/commands/ping.ts` - Simple command with no options
 - `src/commands/about.ts` - Basic informational command
+- `src/commands/roll.ts` - Command with multiple optional parameters
+- `src/commands/coffee.ts` - Complex command with guild member interaction and DMs
 - `src/commands/_template.ts` - Template with comments and examples

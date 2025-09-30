@@ -118,6 +118,8 @@ Push to the `master` branch to trigger the GitHub Actions workflow. It will:
 
 - `/ping` - Simple health check, responds with "pong"
 - `/about` - Information about the bot
+- `/roll` - Roll dice with customizable sides and count
+- `/coffee` - Start a coffee chat with a random server member
 
 ### Adding New Commands
 
@@ -149,6 +151,8 @@ src/
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run start` - Start production server
 - `npm run register:dist` - Register commands using compiled JavaScript
+- `npm test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
 
 ## Architecture
 
