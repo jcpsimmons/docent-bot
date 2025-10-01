@@ -17,52 +17,24 @@ export const coffeeCommand: ISlashCommand = {
     await interaction.deferReply({ ephemeral: true });
 
     try {
-      // Fetch all guild members
-      await interaction.guild.members.fetch();
+      // Without GuildMembers intent, we can't fetch all members
+      // Instead, let's provide a simpler coffee encouragement message
+      const coffeeEmojis = ['☕', '🍵', '🥤', '🧋', '🫖'];
+      const randomEmoji = coffeeEmojis[Math.floor(Math.random() * coffeeEmojis.length)];
       
-      // Get all members excluding bots and the requester
-      const eligibleMembers = interaction.guild.members.cache.filter(
-        member => !member.user.bot && member.id !== interaction.user.id
-      );
-
-      // Check if there are any eligible members
-      if (eligibleMembers.size === 0) {
-        await interaction.editReply({ content: "There are no other members available for a coffee chat!" });
-        return;
-      }
-
-      // Randomly select a member
-      const randomMember = eligibleMembers.random();
-      if (!randomMember) {
-        await interaction.editReply({ content: "Could not find a member for coffee chat. Please try again!" });
-        return;
-      }
-
-      // Create a group DM with the requester, selected member, and bot
-      try {
-        // First, update the deferred reply
-        await interaction.editReply({ content: `☕ Setting up a coffee chat with ${randomMember.displayName}...` });
-
-        // Try to create DMs with both users
-        const requesterDM = await interaction.user.createDM();
-        const selectedMemberDM = await randomMember.user.createDM();
-
-        // Send coffee chat messages to both users
-        const coffeeMessage = `☕ **Coffee Chat Time!** ☕\n\nHey there! It's time for a spontaneous coffee chat! 🎉\n\n**${interaction.user.displayName}** and **${randomMember.displayName}**, you've been randomly paired up for a friendly conversation.\n\nWhy not grab a coffee (or your favorite beverage) and have a chat? This is a great opportunity to:\n• Get to know each other better\n• Share what you're working on\n• Exchange ideas and experiences\n• Just have a friendly conversation!\n\nEnjoy your coffee chat! ☕✨`;
-
-        await requesterDM.send(coffeeMessage);
-        await selectedMemberDM.send(coffeeMessage);
-
-        // Send a follow-up to confirm success
-        await interaction.editReply({ content: `✅ Coffee chat started! Check your DMs - you've been paired with ${randomMember.displayName}!` });
-
-      } catch (dmError) {
-        console.error('Error creating DMs:', dmError);
-        // If DMs fail, fall back to a public message by editing the reply
-        await interaction.editReply({ 
-          content: `☕ **Coffee Chat Time!** ☕\n\n${interaction.user} and ${randomMember}, you've been randomly paired for a coffee chat! Why not grab a coffee and have a friendly conversation? 🎉`
-        });
-      }
+      const encouragementMessages = [
+        "Time for a coffee break! Why not invite someone for a chat?",
+        "Coffee time! Perfect moment to connect with your colleagues.",
+        "How about a coffee chat? Great conversations start with great coffee!",
+        "Take a coffee break and make someone's day with a friendly chat!",
+        "Coffee + conversation = perfect combination! Reach out to someone!"
+      ];
+      
+      const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+      
+      await interaction.editReply({ 
+        content: `${randomEmoji} **${randomMessage}** ${randomEmoji}\n\nUse this as your excuse to reach out to someone for a friendly coffee chat! 🎉`
+      });
 
     } catch (error) {
       console.error('Error in coffee command:', error);

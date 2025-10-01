@@ -13,7 +13,7 @@ if (!DISCORD_TOKEN || !CLIENT_ID) {
   throw new Error("Missing DISCORD_TOKEN or CLIENT_ID");
 }
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 import { getCommand } from "./commands/index.js";
 import { scheduler } from "./services/scheduler.js";
@@ -51,12 +51,53 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-// Tiny HTTP health server so Fly keeps the machine warm
-http
-  .createServer((_, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("ok");
-  })
-  .listen(Number(PORT), () => console.log(`Health on :${PORT}`));
+// Track bot readiness
+let isReady = false;
+let lastError: string | null = null;
 
-client.login(DISCORD_TOKEN);
+// Tiny HTTP health server so Fly keeps the machine warm
+const server = http.createServer((_, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("ok");
+});
+
+server.listen(Number(PORT), () => console.log(`Health on :${PORT}`));
+
+// Enhanced error handling
+client.on('ready', () => {
+  isReady = true;
+  lastError = null;
+});
+
+client.on('error', (error) => {
+  console.error('Discord client error:', error);
+  lastError = error.message;
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully...');
+  server.close();
+  client.destroy();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully...');
+  server.close();
+  client.destroy();
+  process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  lastError = error.message;
+  // Don't exit immediately, let health checks handle it
+});
+
+client.login(DISCORD_TOKEN).catch(error => {
+  console.error('Failed to login to Discord:', error);
+  lastError = error.message;
+  // Keep the health server running even if Discord login fails
+});
